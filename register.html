@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>도서 등록 - GeoBooks</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">
+        <svg class="logo-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10A15.3 15.3 0 0 1 12 2z"/>
+        </svg>
+        <span class="logo-text">GeoBooks</span>
+      </a>
+      <nav class="nav">
+        <a href="index.html" class="nav-link">도서 목록</a>
+        <a href="admin.html" class="nav-link nav-link--admin">관리자</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Register Form -->
+  <section class="page-section">
+    <div class="container container--narrow">
+      <div class="page-header">
+        <h1 class="page-title">도서 등록</h1>
+        <p class="page-desc">지리 관련 도서를 등록해주세요. 관리자 승인 후 목록에 게시됩니다.</p>
+      </div>
+
+      <form id="registerForm" class="form">
+        <!-- Cover Image -->
+        <div class="form-group">
+          <label class="form-label">표지 이미지</label>
+          <div class="cover-upload" id="coverUpload">
+            <input type="file" id="coverInput" accept="image/*" hidden>
+            <div class="cover-preview" id="coverPreview">
+              <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="#bbb" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+                <path d="M21 15l-5-5L5 21"/>
+              </svg>
+              <span>클릭하여 이미지 업로드</span>
+            </div>
+            <img id="coverImg" class="cover-img" style="display:none;" alt="표지 미리보기">
+          </div>
+        </div>
+
+        <!-- Book Info -->
+        <div class="form-group">
+          <label class="form-label" for="title">도서명 <span class="required">*</span></label>
+          <input type="text" id="title" class="form-input" placeholder="도서명을 입력하세요" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="subtitle">부제</label>
+          <input type="text" id="subtitle" class="form-input" placeholder="부제목 (선택)">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="author">저자 <span class="required">*</span></label>
+            <input type="text" id="author" class="form-input" placeholder="저자명" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="publisher">출판사 <span class="required">*</span></label>
+            <input type="text" id="publisher" class="form-input" placeholder="출판사명" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="pubDate">출판일</label>
+            <input type="date" id="pubDate" class="form-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="isbn">ISBN</label>
+            <input type="text" id="isbn" class="form-input" placeholder="ISBN 번호">
+          </div>
+        </div>
+
+        <!-- 구매 링크 -->
+        <div class="form-group">
+          <label class="form-label">구매 링크</label>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label form-label--sub" for="linkKyobo">교보문고</label>
+            <input type="url" id="linkKyobo" class="form-input" placeholder="https://...">
+          </div>
+          <div class="form-group">
+            <label class="form-label form-label--sub" for="linkYes24">Yes24</label>
+            <input type="url" id="linkYes24" class="form-input" placeholder="https://...">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label form-label--sub" for="linkAladin">알라딘</label>
+            <input type="url" id="linkAladin" class="form-input" placeholder="https://...">
+          </div>
+          <div class="form-group">
+            <label class="form-label form-label--sub" for="linkEtc">기타</label>
+            <input type="url" id="linkEtc" class="form-input" placeholder="https://...">
+          </div>
+        </div>
+
+        <!-- Categories -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="level">수준별 <span class="required">*</span></label>
+            <select id="level" class="form-select" required>
+              <option value="">선택하세요</option>
+              <option value="유·초등">유·초등</option>
+              <option value="중등">중등</option>
+              <option value="대학/임용">대학/임용</option>
+              <option value="교양">교양</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="content">내용별 <span class="required">*</span></label>
+            <select id="content" class="form-select" required>
+              <option value="">선택하세요</option>
+              <optgroup label="자연지리">
+                <option value="자연지리">자연지리 (전체)</option>
+                <option value="기후">기후</option>
+                <option value="지형">지형</option>
+              </optgroup>
+              <optgroup label="인문지리">
+                <option value="인문지리">인문지리 (전체)</option>
+                <option value="문화">문화</option>
+                <option value="역사">역사</option>
+                <option value="도시">도시</option>
+                <option value="촌락">촌락</option>
+                <option value="경제">경제</option>
+                <option value="정치">정치</option>
+              </optgroup>
+              <optgroup label="기타">
+                <option value="교육">교육</option>
+                <option value="지도·GIS">지도·GIS</option>
+                <option value="지역">지역</option>
+                <option value="사상">사상</option>
+                <option value="기타">기타</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" id="submitBtn">
+          도서 등록 요청
+        </button>
+      </form>
+
+      <!-- Toast -->
+      <div class="toast" id="toast"></div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <p class="copyright">&copy; 2026 GeoBooks · 양정고등학교 지리교사 김용현 | bgnlkim@gmail.com</p>
+    </div>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/register.js"></script>
+</body>
+</html>

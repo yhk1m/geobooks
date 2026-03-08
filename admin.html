@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>관리자 - GeoBooks</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">
+        <svg class="logo-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10A15.3 15.3 0 0 1 12 2z"/>
+        </svg>
+        <span class="logo-text">GeoBooks</span>
+      </a>
+      <nav class="nav">
+        <a href="index.html" class="nav-link">도서 목록</a>
+        <a href="register.html" class="nav-link">도서 등록</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Admin Section -->
+  <section class="page-section">
+    <div class="container">
+      <!-- Login -->
+      <div id="loginSection" class="admin-login">
+        <div class="admin-login-box">
+          <h1 class="page-title">관리자 로그인</h1>
+          <p class="page-desc">승인 대기 중인 도서를 관리합니다.</p>
+          <div class="form-group">
+            <input type="password" id="adminPassword" class="form-input" placeholder="관리자 비밀번호를 입력하세요">
+          </div>
+          <button id="loginBtn" class="btn btn-primary btn-block">로그인</button>
+          <p class="error-msg" id="loginError" style="display:none;"></p>
+        </div>
+      </div>
+
+      <!-- Pending Books -->
+      <div id="adminPanel" style="display:none;">
+        <div class="admin-header">
+          <h1 class="page-title">승인 대기 도서</h1>
+          <div class="admin-actions">
+            <span class="pending-count" id="pendingCount">0건 대기 중</span>
+            <button id="refreshBtn" class="btn btn-outline">새로고침</button>
+            <button id="logoutBtn" class="btn btn-ghost">로그아웃</button>
+          </div>
+        </div>
+
+        <div class="loading" id="adminLoading" style="display:none;">
+          <div class="spinner"></div>
+          <p>불러오는 중...</p>
+        </div>
+
+        <div class="empty-state" id="adminEmpty" style="display:none;">
+          <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#ccc" stroke-width="1.5">
+            <path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/>
+          </svg>
+          <p>승인 대기 중인 도서가 없습니다.</p>
+        </div>
+
+        <div class="pending-list" id="pendingList"></div>
+
+        <!-- Approved Books (삭제 관리) -->
+        <div class="admin-header" style="margin-top:48px;">
+          <h2 class="page-title">등록 도서 관리</h2>
+          <div class="admin-actions">
+            <span class="pending-count" id="booksCount">0권</span>
+          </div>
+        </div>
+
+        <div class="admin-search-box">
+          <input type="text" id="adminSearchInput" class="form-input" placeholder="도서명, 저자로 검색...">
+        </div>
+
+        <div class="loading" id="booksLoading" style="display:none;">
+          <div class="spinner"></div>
+          <p>불러오는 중...</p>
+        </div>
+
+        <div class="empty-state" id="booksEmpty" style="display:none;">
+          <p>등록된 도서가 없습니다.</p>
+        </div>
+
+        <div class="pending-list" id="booksList"></div>
+      </div>
+
+      <!-- Toast -->
+      <div class="toast" id="toast"></div>
+    </div>
+  </section>
+
+  <!-- Edit Modal -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal">
+      <button class="modal-close" id="editModalClose">&times;</button>
+      <div class="modal-body">
+        <h2 class="page-title" style="margin-bottom:24px;">도서 정보 수정</h2>
+        <form id="editForm" class="form">
+          <input type="hidden" id="editId">
+          <input type="hidden" id="editSheet">
+          <div class="form-group">
+            <label class="form-label" for="editTitle">도서명</label>
+            <input type="text" id="editTitle" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="editSubtitle">부제</label>
+            <input type="text" id="editSubtitle" class="form-input" placeholder="부제목 (선택)">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="editAuthor">저자</label>
+              <input type="text" id="editAuthor" class="form-input" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="editPublisher">출판사</label>
+              <input type="text" id="editPublisher" class="form-input" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="editPubDate">출판일</label>
+              <input type="date" id="editPubDate" class="form-input">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="editIsbn">ISBN</label>
+              <input type="text" id="editIsbn" class="form-input">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">구매 링크</label>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label form-label--sub" for="editLinkKyobo">교보문고</label>
+              <input type="url" id="editLinkKyobo" class="form-input" placeholder="https://...">
+            </div>
+            <div class="form-group">
+              <label class="form-label form-label--sub" for="editLinkYes24">Yes24</label>
+              <input type="url" id="editLinkYes24" class="form-input" placeholder="https://...">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label form-label--sub" for="editLinkAladin">알라딘</label>
+              <input type="url" id="editLinkAladin" class="form-input" placeholder="https://...">
+            </div>
+            <div class="form-group">
+              <label class="form-label form-label--sub" for="editLinkEtc">기타</label>
+              <input type="url" id="editLinkEtc" class="form-input" placeholder="https://...">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="editLevel">수준별</label>
+              <select id="editLevel" class="form-select" required>
+                <option value="유·초등">유·초등</option>
+                <option value="중등">중등</option>
+                <option value="대학/임용">대학/임용</option>
+                <option value="교양">교양</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="editContent">내용별</label>
+              <select id="editContent" class="form-select" required>
+                <optgroup label="자연지리">
+                  <option value="자연지리">자연지리 (전체)</option>
+                  <option value="기후">기후</option>
+                  <option value="지형">지형</option>
+                </optgroup>
+                <optgroup label="인문지리">
+                  <option value="인문지리">인문지리 (전체)</option>
+                  <option value="문화">문화</option>
+                  <option value="역사">역사</option>
+                  <option value="도시">도시</option>
+                  <option value="촌락">촌락</option>
+                  <option value="경제">경제</option>
+                  <option value="정치">정치</option>
+                </optgroup>
+                <optgroup label="기타">
+                  <option value="교육">교육</option>
+                  <option value="지도·GIS">지도·GIS</option>
+                  <option value="지역">지역</option>
+                  <option value="사상">사상</option>
+                  <option value="기타">기타</option>
+                </optgroup>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">지정도서목록</label>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label form-label--sub" for="editProject1">목록1</label>
+              <input type="text" id="editProject1" class="form-input" placeholder="도서목록명">
+            </div>
+            <div class="form-group">
+              <label class="form-label form-label--sub" for="editProject2">목록2</label>
+              <input type="text" id="editProject2" class="form-input" placeholder="도서목록명">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label form-label--sub" for="editProject3">목록3</label>
+              <input type="text" id="editProject3" class="form-input" placeholder="도서목록명">
+            </div>
+            <div class="form-group">
+              <label class="form-label form-label--sub" for="editProject4">목록4</label>
+              <input type="text" id="editProject4" class="form-input" placeholder="도서목록명">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label form-label--sub" for="editProject5">목록5</label>
+              <input type="text" id="editProject5" class="form-input" placeholder="도서목록명">
+            </div>
+            <div class="form-group"></div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block" id="editSubmitBtn">저장</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Modal -->
+  <div class="modal-overlay" id="confirmModal">
+    <div class="modal modal--sm">
+      <div class="modal-body confirm-body">
+        <p id="confirmMsg"></p>
+        <div class="confirm-actions">
+          <button id="confirmYes" class="btn btn-primary">확인</button>
+          <button id="confirmNo" class="btn btn-outline">취소</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <p class="copyright">&copy; 2026 GeoBooks · 양정고등학교 지리교사 김용현 | bgnlkim@gmail.com</p>
+    </div>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
