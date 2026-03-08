@@ -10,6 +10,8 @@
   let searchQuery = '';
   let showNewOnly = false;
   let currentProject = 'all';
+  let currentPage = 1;
+  let pageSize = 20;
 
   // 내용별 위계 구조
   const CONTENT_HIERARCHY = {
@@ -25,6 +27,7 @@
     initMobileMenu();
     initFilters();
     initSearch();
+    initPageSize();
     initModal();
     loadBooks();
     trackView();
@@ -60,6 +63,7 @@
         // 신간 토글 해제
         showNewOnly = false;
         $('#newBookFilter').classList.remove('active');
+        currentPage = 1;
         renderBooks();
       });
     });
@@ -70,6 +74,7 @@
       newBtn.addEventListener('click', () => {
         showNewOnly = !showNewOnly;
         newBtn.classList.toggle('active', showNewOnly);
+        currentPage = 1;
         renderBooks();
       });
     }
@@ -101,6 +106,7 @@
               subPanel.querySelectorAll('.chip').forEach((s) => s.classList.remove('active'));
               sub.classList.add('active');
               currentContent = sub.dataset.value;
+              currentPage = 1;
               renderBooks();
             });
           });
@@ -111,6 +117,7 @@
           currentContent = value;
         }
 
+        currentPage = 1;
         renderBooks();
       });
     });
@@ -124,6 +131,7 @@
       clearTimeout(timer);
       timer = setTimeout(() => {
         searchQuery = input.value.trim().toLowerCase();
+        currentPage = 1;
         renderBooks();
       }, 300);
     });
@@ -170,6 +178,16 @@
     return bookContent === currentContent;
   }
 
+  // ---- Page Size ----
+  function initPageSize() {
+    const select = $('#pageSize');
+    select.addEventListener('change', () => {
+      pageSize = Number(select.value);
+      currentPage = 1;
+      renderBooks();
+    });
+  }
+
   // ---- Project Filter ----
   function getBookProjects(book) {
     const projects = [];
@@ -203,6 +221,7 @@
 
     select.addEventListener('change', () => {
       currentProject = select.value;
+      currentPage = 1;
       renderBooks();
     });
   }
@@ -235,21 +254,63 @@
     });
 
     count.textContent = filtered.length;
+    const paginationEl = $('#pagination');
 
     if (filtered.length === 0) {
       grid.innerHTML = '';
       empty.style.display = '';
+      paginationEl.innerHTML = '';
       return;
     }
 
+    const totalPages = Math.ceil(filtered.length / pageSize);
+    if (currentPage > totalPages) currentPage = totalPages;
+    const start = (currentPage - 1) * pageSize;
+    const paged = filtered.slice(start, start + pageSize);
+
     empty.style.display = 'none';
-    grid.innerHTML = filtered.map((book) => cardHTML(book)).join('');
+    grid.innerHTML = paged.map((book) => cardHTML(book)).join('');
 
     grid.querySelectorAll('.book-card').forEach((card) => {
       card.addEventListener('click', () => {
         const id = card.dataset.id;
         const book = allBooks.find((b) => b.ID === id);
         if (book) openModal(book);
+      });
+    });
+
+    renderPagination(totalPages);
+  }
+
+  function renderPagination(totalPages) {
+    const el = $('#pagination');
+    if (totalPages <= 1) { el.innerHTML = ''; return; }
+
+    const maxVisible = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+    let endPage = startPage + maxVisible - 1;
+    if (endPage > totalPages) {
+      endPage = totalPages;
+      startPage = Math.max(1, endPage - maxVisible + 1);
+    }
+
+    let html = '';
+    html += `<button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} data-page="1">&laquo;</button>`;
+    html += `<button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} data-page="${currentPage - 1}">&lsaquo;</button>`;
+
+    for (let i = startPage; i <= endPage; i++) {
+      html += `<button class="page-btn${i === currentPage ? ' active' : ''}" data-page="${i}">${i}</button>`;
+    }
+
+    html += `<button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} data-page="${currentPage + 1}">&rsaquo;</button>`;
+    html += `<button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} data-page="${totalPages}">&raquo;</button>`;
+
+    el.innerHTML = html;
+    el.querySelectorAll('.page-btn:not([disabled])').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        currentPage = Number(btn.dataset.page);
+        renderBooks();
+        window.scrollTo({ top: $('#bookGrid').offsetTop - 80, behavior: 'smooth' });
       });
     });
   }

@@ -98,6 +98,13 @@
     <div class="container">
       <div class="results-header">
         <span class="result-count"><strong id="resultCount">0</strong>권의 도서</span>
+        <div class="page-size-wrap">
+          <select id="pageSize" class="page-size-select">
+            <option value="10">10개씩</option>
+            <option value="20" selected>20개씩</option>
+            <option value="50">50개씩</option>
+          </select>
+        </div>
       </div>
       <div class="book-grid" id="bookGrid"></div>
       <div class="loading" id="loading">
@@ -110,6 +117,7 @@
         </svg>
         <p>검색 결과가 없습니다.</p>
       </div>
+      <div class="pagination" id="pagination"></div>
     </div>
   </section>
 
