@@ -314,35 +314,42 @@ function deleteBook(id) {
 // ========== Viewership ==========
 
 function addView() {
-  var sheet = getOrCreateSheet(STATS_SHEET);
-  var data = sheet.getDataRange().getValues();
-  var today = getTodayStr();
+  var lock = LockService.getScriptLock();
+  lock.waitLock(10000);
 
-  if (data.length < 2) {
-    sheet.appendRow([today, 1, 1]);
-    return { success: true, today: 1, total: 1 };
+  try {
+    var sheet = getOrCreateSheet(STATS_SHEET);
+    var data = sheet.getDataRange().getValues();
+    var today = getTodayStr();
+
+    if (data.length < 2) {
+      sheet.appendRow([today, 1, 1]);
+      return { success: true, today: 1, total: 1 };
+    }
+
+    var lastRow = data.length;
+    var lastDate = data[lastRow - 1][0];
+    var lastDateStr = (lastDate instanceof Date)
+      ? Utilities.formatDate(lastDate, 'Asia/Seoul', 'yyyy-MM-dd')
+      : String(lastDate);
+
+    var todayCount, totalCount;
+
+    if (lastDateStr === today) {
+      todayCount = Number(data[lastRow - 1][1]) + 1;
+      totalCount = Number(data[lastRow - 1][2]) + 1;
+      sheet.getRange(lastRow, 2).setValue(todayCount);
+      sheet.getRange(lastRow, 3).setValue(totalCount);
+    } else {
+      totalCount = Number(data[lastRow - 1][2]) + 1;
+      todayCount = 1;
+      sheet.appendRow([today, todayCount, totalCount]);
+    }
+
+    return { success: true, today: todayCount, total: totalCount };
+  } finally {
+    lock.releaseLock();
   }
-
-  var lastRow = data.length;
-  var lastDate = data[lastRow - 1][0];
-  var lastDateStr = (lastDate instanceof Date)
-    ? Utilities.formatDate(lastDate, 'Asia/Seoul', 'yyyy-MM-dd')
-    : String(lastDate);
-
-  var todayCount, totalCount;
-
-  if (lastDateStr === today) {
-    todayCount = Number(data[lastRow - 1][1]) + 1;
-    totalCount = Number(data[lastRow - 1][2]) + 1;
-    sheet.getRange(lastRow, 2).setValue(todayCount);
-    sheet.getRange(lastRow, 3).setValue(totalCount);
-  } else {
-    totalCount = Number(data[lastRow - 1][2]) + 1;
-    todayCount = 1;
-    sheet.appendRow([today, todayCount, totalCount]);
-  }
-
-  return { success: true, today: todayCount, total: totalCount };
 }
 
 function getStats() {
