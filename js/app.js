@@ -227,6 +227,13 @@
       return true;
     });
 
+    filtered.sort((a, b) => {
+      const da = a['출판일'] || '';
+      const db = b['출판일'] || '';
+      if (da !== db) return da > db ? -1 : 1;
+      return (a['도서명'] || '').localeCompare(b['도서명'] || '', 'ko');
+    });
+
     count.textContent = filtered.length;
 
     if (filtered.length === 0) {
