@@ -17,7 +17,7 @@
 const CONFIG = {
   SPREADSHEET_ID: '1joMA86DKXxA6-sZegFnaOjI-gI5J_Ah6elQc1RWm8Gs',
   ADMIN_PASSWORD: 'geo1234',
-  DRIVE_FOLDER_ID: '16RIdOU5WLR05tC7c8-truXg3XPv_Ij8Z'
+  ADMIN_EMAIL: 'bgnlkim@gmail.com'
 };
 
 const BOOKS_SHEET = '도서목록';
@@ -163,12 +163,7 @@ function getPending() {
 function registerBook(data) {
   var sheet = getOrCreateSheet(PENDING_SHEET);
 
-  // Handle image upload to Google Drive
-  var imageUrl = '';
-  if (data.coverImage) {
-    imageUrl = uploadImage(data.coverImage);
-  }
-
+  var imageUrl = data.coverUrl || '';
   var id = 'B' + Date.now();
   var now = getTodayStr();
 
@@ -190,6 +185,29 @@ function registerBook(data) {
     now,
     '', '', '', '', ''
   ]);
+
+  // Send email notification
+  try {
+    MailApp.sendEmail({
+      to: CONFIG.ADMIN_EMAIL,
+      subject: '[GeoShelf] 새 도서 등록 요청: ' + (data.title || '제목 없음'),
+      body: '새로운 도서 등록 요청이 있습니다.\n\n'
+        + '도서명: ' + (data.title || '') + '\n'
+        + '부제: ' + (data.subtitle || '') + '\n'
+        + '저자: ' + (data.author || '') + '\n'
+        + '출판사: ' + (data.publisher || '') + '\n'
+        + '출판일: ' + (data.pubDate || '') + '\n'
+        + 'ISBN: ' + (data.isbn || '') + '\n'
+        + '수준별: ' + (data.level || '') + '\n'
+        + '내용별: ' + (data.content || '') + '\n'
+        + '등록일: ' + now + '\n\n'
+        + '관리자 페이지에서 승인해주세요.\n'
+        + 'https://geoshelf.kr/admin.html'
+    });
+  } catch (e) {
+    // 이메일 전송 실패해도 등록은 정상 처리
+    Logger.log('Email send failed: ' + e.message);
+  }
 
   return {
     success: true,
@@ -291,26 +309,6 @@ function deleteBook(id) {
   }
 
   return { success: false, error: '해당 도서를 찾을 수 없습니다.' };
-}
-
-// ========== Image Upload ==========
-
-function uploadImage(base64Data) {
-  var folder = DriveApp.getFolderById(CONFIG.DRIVE_FOLDER_ID);
-
-  // Parse base64 data
-  var parts = base64Data.split(',');
-  var mimeMatch = parts[0].match(/:(.*?);/);
-  var mime = mimeMatch ? mimeMatch[1] : 'image/jpeg';
-  var bytes = Utilities.base64Decode(parts[1]);
-  var blob = Utilities.newBlob(bytes, mime, 'cover_' + Date.now() + '.jpg');
-
-  // Create file and set public access
-  var file = folder.createFile(blob);
-  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-
-  // Return thumbnail URL
-  return 'https://drive.google.com/thumbnail?id=' + file.getId() + '&sz=w400';
 }
 
 // ========== Viewership ==========

@@ -7,38 +7,8 @@
   const $ = (sel) => document.querySelector(sel);
 
   document.addEventListener('DOMContentLoaded', () => {
-    initCoverUpload();
     initForm();
   });
-
-  // ---- Cover Image Upload & Preview ----
-  function initCoverUpload() {
-    const upload = $('#coverUpload');
-    const input = $('#coverInput');
-    const preview = $('#coverPreview');
-    const img = $('#coverImg');
-
-    upload.addEventListener('click', () => input.click());
-
-    input.addEventListener('change', () => {
-      const file = input.files[0];
-      if (!file) return;
-
-      if (file.size > 5 * 1024 * 1024) {
-        showToast('이미지 크기는 5MB 이하만 가능합니다.', 'error');
-        input.value = '';
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        img.src = e.target.result;
-        img.style.display = 'block';
-        preview.style.display = 'none';
-      };
-      reader.readAsDataURL(file);
-    });
-  }
 
   // ---- Form Submit ----
   function initForm() {
@@ -60,21 +30,18 @@
       const linkEtc = $('#linkEtc').value.trim();
       const level = $('#level').value;
       const content = $('#content').value;
+      const coverUrl = $('#coverUrl').value.trim();
 
       if (!title || !author || !publisher || !level || !content) {
         showToast('필수 항목을 모두 입력해주세요.', 'error');
         return;
       }
 
-      // Get cover image as base64
-      const coverImg = $('#coverImg');
-      const coverImage = coverImg.style.display !== 'none' ? coverImg.src : '';
-
       const payload = {
         action: 'register',
         title, subtitle, author, publisher, pubDate, isbn,
         linkKyobo, linkYes24, linkAladin, linkEtc,
-        level, content, coverImage
+        level, content, coverUrl
       };
 
       submitBtn.disabled = true;
@@ -84,7 +51,6 @@
         await new Promise((r) => setTimeout(r, 800));
         showToast('(데모) 도서가 등록 요청되었습니다. 관리자 승인 후 게시됩니다.', 'success');
         form.reset();
-        resetCoverPreview();
         submitBtn.disabled = false;
         submitBtn.textContent = '도서 등록 요청';
         return;
@@ -101,7 +67,6 @@
         if (data.success) {
           showToast(data.message || '도서가 등록 요청되었습니다.', 'success');
           form.reset();
-          resetCoverPreview();
         } else {
           showToast(data.error || '등록에 실패했습니다.', 'error');
         }
@@ -113,16 +78,6 @@
       submitBtn.disabled = false;
       submitBtn.textContent = '도서 등록 요청';
     });
-  }
-
-  function resetCoverPreview() {
-    const preview = $('#coverPreview');
-    const img = $('#coverImg');
-    const input = $('#coverInput');
-    img.style.display = 'none';
-    img.src = '';
-    preview.style.display = '';
-    input.value = '';
   }
 
   // ---- Toast ----
