@@ -1,5 +1,5 @@
 /**
- * GeoBooks - Admin Page Logic
+ * GeoShelf - Admin Page Logic
  */
 (function () {
   'use strict';

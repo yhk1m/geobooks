@@ -1,5 +1,5 @@
 /**
- * GeoBooks - Google Apps Script Backend
+ * GeoShelf - Google Apps Script Backend
  *
  * 사용법:
  * 1. Google 스프레드시트를 새로 만듭니다.
@@ -379,5 +379,5 @@ function setup() {
   getOrCreateSheet(PENDING_SHEET);
   getOrCreateSheet(TRASH_SHEET);
   getOrCreateSheet(STATS_SHEET);
-  Logger.log('GeoBooks 시트 초기화 완료!');
+  Logger.log('GeoShelf 시트 초기화 완료!');
 }

@@ -1,5 +1,5 @@
 /**
- * GeoBooks Configuration
+ * GeoShelf Configuration
  *
  * Google Apps Script 웹앱 배포 후 아래 URL을 교체하세요.
  * 예: https://script.google.com/macros/s/XXXXXX/exec
