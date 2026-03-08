@@ -49,7 +49,7 @@
     const pub = new Date(pubDate).getTime();
     if (isNaN(pub)) return false;
     const diff = Date.now() - pub;
-    return diff <= 60 * 24 * 60 * 60 * 1000;
+    return diff <= 90 * 24 * 60 * 60 * 1000;
   }
 
   // ---- Filters ----
