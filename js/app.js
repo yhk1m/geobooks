@@ -337,7 +337,7 @@
           ${book['부제'] ? `<p class="modal-subtitle">${escapeHtml(book['부제'])}</p>` : ''}
           <div class="detail-row"><span class="detail-label">저자</span><span class="detail-value">${escapeHtml(book['저자'])}</span></div>
           <div class="detail-row"><span class="detail-label">출판사</span><span class="detail-value">${escapeHtml(book['출판사'])}</span></div>
-          <div class="detail-row"><span class="detail-label">출판일</span><span class="detail-value">${escapeHtml(book['출판일'] || '-')}</span></div>
+          <div class="detail-row"><span class="detail-label">출판일</span><span class="detail-value">${escapeHtml(formatDate(book['출판일']))}</span></div>
           <div class="detail-row"><span class="detail-label">ISBN</span><span class="detail-value">${escapeHtml(book['ISBN'] || '-')}</span></div>
           <div class="modal-badges">
             <span class="badge badge--level">${escapeHtml(book['수준별'])}</span>
@@ -387,6 +387,11 @@
   }
 
   // ---- Utilities ----
+  function formatDate(val) {
+    if (!val) return '-';
+    return String(val).slice(0, 10);
+  }
+
   function escapeHtml(str) {
     if (!str) return '';
     return String(str)

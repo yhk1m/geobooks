@@ -294,7 +294,7 @@
         <div class="pending-info">
           <h3>${escapeHtml(book['도서명'])}</h3>
           <p class="pending-meta">${escapeHtml(book['저자'])} · ${escapeHtml(book['출판사'])}</p>
-          <p class="pending-meta">출판일: ${escapeHtml(book['출판일'] || '-')} / ISBN: ${escapeHtml(book['ISBN'] || '-')}</p>
+          <p class="pending-meta">출판일: ${escapeHtml(formatDate(book['출판일']))} / ISBN: ${escapeHtml(book['ISBN'] || '-')}</p>
           <p class="pending-meta">${dateLabel}: ${escapeHtml(dateValue)}</p>
           <div class="pending-badges">
             <span class="badge badge--level">${escapeHtml(book['수준별'])}</span>
@@ -331,7 +331,7 @@
     $('#editSubtitle').value = book['부제'] || '';
     $('#editAuthor').value = book['저자'] || '';
     $('#editPublisher').value = book['출판사'] || '';
-    $('#editPubDate').value = book['출판일'] || '';
+    $('#editPubDate').value = formatDate(book['출판일']) === '-' ? '' : formatDate(book['출판일']);
     $('#editIsbn').value = book['ISBN'] || '';
     $('#editLinkKyobo').value = book['교보문고'] || '';
     $('#editLinkYes24').value = book['Yes24'] || '';
@@ -516,6 +516,11 @@
   }
 
   // ---- Utilities ----
+  function formatDate(val) {
+    if (!val) return '-';
+    return String(val).slice(0, 10);
+  }
+
   function escapeHtml(str) {
     if (!str) return '';
     return String(str)
