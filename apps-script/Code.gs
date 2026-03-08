@@ -17,7 +17,7 @@
 const CONFIG = {
   SPREADSHEET_ID: '1joMA86DKXxA6-sZegFnaOjI-gI5J_Ah6elQc1RWm8Gs',
   ADMIN_PASSWORD: 'geo1234',
-  ADMIN_EMAIL: 'bgnlkim@gmail.com'
+  ADMIN_EMAIL: 'kyh920611@naver.com'
 };
 
 const BOOKS_SHEET = '도서목록';
