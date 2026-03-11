@@ -54,7 +54,7 @@
     };
 
     loginBtn.addEventListener('click', doLogin);
-    passwordInput.addEventListener('keydown', (e) => {
+    passwordInput.addEventListener('keyup', (e) => {
       if (e.key === 'Enter') doLogin();
     });
 
