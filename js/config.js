@@ -6,7 +6,7 @@
  */
 const CONFIG = {
   API_URL: 'https://script.google.com/macros/s/AKfycbzzi8xrIvQtxbWW720lIqVw263EGAr2yTAlyW7XPtQfjosVMXIJMxCQfbrcn4bQGbkO7Q/exec',
-  ADMIN_PASSWORD: 'geo1234',
+  ADMIN_PASSWORD: '9252121',
   DEMO_MODE: true // API_URL이 비어있으면 자동으로 데모 모드
 };
 

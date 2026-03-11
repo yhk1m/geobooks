@@ -16,7 +16,7 @@
 
 const CONFIG = {
   SPREADSHEET_ID: '1joMA86DKXxA6-sZegFnaOjI-gI5J_Ah6elQc1RWm8Gs',
-  ADMIN_PASSWORD: 'geo1234',
+  ADMIN_PASSWORD: '9252121',
   ADMIN_EMAIL: 'kyh920611@naver.com'
 };
 
@@ -313,6 +313,24 @@ function deleteBook(id) {
 
 // ========== Viewership ==========
 
+/**
+ * 셀 값을 yyyy-MM-dd 문자열로 변환 (Date 객체, 문자열 모두 처리)
+ */
+function toDateStr(val) {
+  if (val instanceof Date) {
+    return Utilities.formatDate(val, 'Asia/Seoul', 'yyyy-MM-dd');
+  }
+  var s = String(val).trim();
+  // 이미 yyyy-MM-dd 형식이면 그대로 반환
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  // Date 파싱 시도
+  var d = new Date(s);
+  if (!isNaN(d.getTime())) {
+    return Utilities.formatDate(d, 'Asia/Seoul', 'yyyy-MM-dd');
+  }
+  return s;
+}
+
 function addView() {
   var lock = LockService.getScriptLock();
   lock.waitLock(10000);
@@ -327,22 +345,31 @@ function addView() {
       return { success: true, today: 1, total: 1 };
     }
 
+    // 마지막 행에서 total 가져오기
     var lastRow = data.length;
-    var lastDate = data[lastRow - 1][0];
-    var lastDateStr = (lastDate instanceof Date)
-      ? Utilities.formatDate(lastDate, 'Asia/Seoul', 'yyyy-MM-dd')
-      : String(lastDate);
+    var totalCount = Number(data[lastRow - 1][2]) || 0;
 
-    var todayCount, totalCount;
+    // 뒤에서부터 오늘 날짜 행 찾기
+    var todayRowIdx = -1;
+    for (var i = data.length - 1; i >= 1; i--) {
+      if (toDateStr(data[i][0]) === today) {
+        todayRowIdx = i;
+        break;
+      }
+    }
 
-    if (lastDateStr === today) {
-      todayCount = Number(data[lastRow - 1][1]) + 1;
-      totalCount = Number(data[lastRow - 1][2]) + 1;
-      sheet.getRange(lastRow, 2).setValue(todayCount);
+    var todayCount;
+    if (todayRowIdx >= 0) {
+      // 오늘 행이 이미 존재 → 카운트만 증가
+      todayCount = Number(data[todayRowIdx][1]) + 1;
+      totalCount = totalCount + 1;
+      sheet.getRange(todayRowIdx + 1, 2).setValue(todayCount);
+      // total은 항상 마지막 행에 기록
       sheet.getRange(lastRow, 3).setValue(totalCount);
     } else {
-      totalCount = Number(data[lastRow - 1][2]) + 1;
+      // 오늘 첫 방문 → 새 행 1개 추가
       todayCount = 1;
+      totalCount = totalCount + 1;
       sheet.appendRow([today, todayCount, totalCount]);
     }
 
@@ -361,14 +388,17 @@ function getStats() {
   }
 
   var lastRow = data.length;
-  var lastDate = data[lastRow - 1][0];
   var today = getTodayStr();
-  var lastDateStr = (lastDate instanceof Date)
-    ? Utilities.formatDate(lastDate, 'Asia/Seoul', 'yyyy-MM-dd')
-    : String(lastDate);
+  var totalCount = Number(data[lastRow - 1][2]) || 0;
 
-  var todayCount = (lastDateStr === today) ? Number(data[lastRow - 1][1]) : 0;
-  var totalCount = Number(data[lastRow - 1][2]);
+  // 뒤에서부터 오늘 행 찾기
+  var todayCount = 0;
+  for (var i = data.length - 1; i >= 1; i--) {
+    if (toDateStr(data[i][0]) === today) {
+      todayCount = Number(data[i][1]) || 0;
+      break;
+    }
+  }
 
   return { success: true, today: todayCount, total: totalCount };
 }

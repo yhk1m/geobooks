@@ -1103,6 +1103,132 @@ body {
   justify-content: center;
 }
 
+/* ---- ISBN Info ---- */
+.isbn-info-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary);
+  background: var(--primary-bg);
+  border: 1px solid var(--primary-lighter);
+  border-radius: 50%;
+  cursor: pointer;
+  margin-left: 4px;
+  vertical-align: middle;
+  padding: 0;
+  font-family: inherit;
+  transition: all var(--transition);
+}
+
+.isbn-info-btn:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+.isbn-error {
+  font-size: 12px;
+  color: #e03131;
+  display: none;
+}
+
+.isbn-error.show {
+  display: block;
+}
+
+.isbn-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 250;
+  padding: 24px;
+  backdrop-filter: blur(2px);
+}
+
+.isbn-dialog-overlay.open {
+  display: flex;
+}
+
+.isbn-dialog {
+  background: var(--bg);
+  border-radius: var(--radius-lg);
+  max-width: 440px;
+  width: 100%;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.isbn-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--primary-bg-light);
+}
+
+.isbn-dialog-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.isbn-dialog-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--text-light);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background var(--transition);
+}
+
+.isbn-dialog-close:hover {
+  background: var(--border-light);
+}
+
+.isbn-dialog-body {
+  padding: 20px;
+}
+
+.isbn-dialog-body p {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.7;
+  margin-bottom: 12px;
+}
+
+.isbn-dialog-body p:last-of-type {
+  margin-bottom: 16px;
+}
+
+.isbn-example {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 14px;
+  color: var(--text-light);
+}
+
+.isbn-example code {
+  font-weight: 700;
+  color: var(--primary);
+  font-size: 15px;
+  letter-spacing: 0.5px;
+}
+
 /* ---- Toast ---- */
 .toast {
   position: fixed;

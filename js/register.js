@@ -8,6 +8,8 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     initForm();
+    initIsbnInfo();
+    initIsbnValidation();
   });
 
   // ---- Form Submit ----
@@ -34,6 +36,13 @@
 
       if (!title || !author || !publisher || !level || !content) {
         showToast('필수 항목을 모두 입력해주세요.', 'error');
+        return;
+      }
+
+      if (isbn && !/^\d{13}$/.test(isbn)) {
+        $('#isbnError').classList.add('show');
+        $('#isbn').focus();
+        showToast('ISBN은 13자리 숫자여야 합니다.', 'error');
         return;
       }
 
@@ -77,6 +86,40 @@
 
       submitBtn.disabled = false;
       submitBtn.textContent = '도서 등록 요청';
+    });
+  }
+
+  // ---- ISBN Info Dialog ----
+  function initIsbnInfo() {
+    const btn = $('#isbnInfoBtn');
+    const dialog = $('#isbnDialog');
+    const closeBtn = $('#isbnDialogClose');
+
+    btn.addEventListener('click', () => dialog.classList.add('open'));
+    closeBtn.addEventListener('click', () => dialog.classList.remove('open'));
+    dialog.addEventListener('click', (e) => {
+      if (e.target === dialog) dialog.classList.remove('open');
+    });
+  }
+
+  // ---- ISBN Validation ----
+  function initIsbnValidation() {
+    const input = $('#isbn');
+    const error = $('#isbnError');
+
+    input.addEventListener('input', () => {
+      input.value = input.value.replace(/[^0-9]/g, '');
+      if (input.value.length === 13 || input.value.length === 0) {
+        error.classList.remove('show');
+      }
+    });
+
+    input.addEventListener('blur', () => {
+      if (input.value.length > 0 && input.value.length !== 13) {
+        error.classList.add('show');
+      } else {
+        error.classList.remove('show');
+      }
     });
   }
 
