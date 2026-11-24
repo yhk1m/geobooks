@@ -20,8 +20,8 @@
   --accent-dark: #74c69d;        /* 주색, 다크 (라이트보다 밝게) */
   --on-accent-dark: #0b2117;     /* 주색 위 글자, 다크 */
   --second-base: #2d6a4f;        /* 보조색 (선택): 머리 띠, 로고, 차트 둘째 계열. 버튼에 쓰지 않음 */
-  --third-base: #c9a84c;         /* 셋째 색: GeoShelf 원래 금색, 신간 배지에만 */
-  --on-third: #3a2c00;
+  --third-base: #f76707;         /* 셋째 색: 주황, 신간 배지에만 */
+  --on-third: #1f0d00;
   /* 개나리처럼 밝은 주색이면 아래 줄의 주석을 풀어 강조 글자를 진한 글자로 둔다 */
   /* --accent-text-override: var(--text-strong); */
 

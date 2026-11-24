@@ -408,7 +408,7 @@
     const buttons = stores
       .filter((s) => book[s.key])
       .map((s) =>
-        `<a href="${escapeHtml(book[s.key])}" target="_blank" rel="noopener" class="buy-btn">${s.name}<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>`
+        `<a href="${escapeHtml(book[s.key])}" target="_blank" rel="noopener" class="buy-btn buy-btn--${s.cls}">${s.name}<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>`
       );
 
     if (buttons.length === 0) return '';

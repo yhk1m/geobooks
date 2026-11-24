@@ -103,25 +103,25 @@ p { margin: 0; }
 /* ---- 첫머리와 검색 ---- */
 .hero {
   background: var(--surface);
-  padding: var(--sp-8) 0 var(--sp-5);
+  padding: var(--sp-5) 0 var(--sp-3);
 }
 
 .hero-title {
-  font-size: var(--fs-title-l);
+  font-size: var(--fs-title);
   font-weight: var(--fw-bold);
   color: var(--text-strong);
 }
 
 .hero-desc {
-  margin-top: var(--sp-2);
-  font-size: var(--fs-body);
+  margin-top: var(--sp-1);
+  font-size: var(--fs-small);
   color: var(--text-muted);
 }
 
 .search-box {
   position: relative;
   max-width: var(--content-max);
-  margin-top: var(--sp-5);
+  margin-top: var(--sp-4);
 }
 
 .search-icon {
@@ -605,6 +605,16 @@ p { margin: 0; }
 
 @media (hover: hover) { .buy-btn:hover { background: var(--line-strong); } }
 
+/* 서점 버튼은 각 회사 CI 색. 흰 글자 대비가 3.8~4이라 큰 글자(19px 굵게, 기준 3:1)로 */
+.buy-btn--kyobo, .buy-btn--yes24, .buy-btn--aladin { font-size: 1.1875rem; font-weight: var(--fw-bold); }
+.buy-btn--kyobo  { background: #45b035; color: #081d58; } /* 교보 초록 + 교보 남색 */
+.buy-btn--yes24  { background: #0080ff; color: #ffffff; }
+.buy-btn--aladin { background: #f21c8c; color: #ffffff; }
+.buy-btn--kyobo .icon, .buy-btn--yes24 .icon, .buy-btn--aladin .icon { color: currentColor; }
+@media (hover: hover) {
+  .buy-btn--kyobo:hover, .buy-btn--yes24:hover, .buy-btn--aladin:hover { background-image: linear-gradient(rgb(0 0 0 / 0.08), rgb(0 0 0 / 0.08)); }
+}
+
 /* ---- 꼬리말 ---- */
 .footer {
   margin-top: auto;
@@ -985,8 +995,8 @@ p { margin: 0; }
   .visitor-stats { display: none; }
   .nav-link { padding: 0 var(--sp-2); }
 
-  .hero { padding-top: var(--sp-6); }
-  .hero-title { font-size: var(--fs-title); }
+  .hero { padding-top: var(--sp-4); }
+  .hero-title { font-size: var(--fs-title-s); }
 
   /* 칩 줄은 한 줄로 두고 옆으로 밀어서 본다 */
   .filter-group { flex-direction: column; gap: var(--sp-1); }
