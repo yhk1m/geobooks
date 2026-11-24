@@ -17,6 +17,13 @@
     const form = $('#registerForm');
     const submitBtn = $('#submitBtn');
 
+    form.addEventListener('input', (e) => {
+      if (e.target.id !== 'isbn') e.target.removeAttribute('aria-invalid');
+    });
+    form.addEventListener('change', (e) => {
+      if (e.target.tagName === 'SELECT') e.target.removeAttribute('aria-invalid');
+    });
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -34,15 +41,24 @@
       const content = $('#content').value;
       const coverUrl = $('#coverUrl').value.trim();
 
-      if (!title || !author || !publisher || !level || !content) {
-        showToast('필수 항목을 모두 입력해주세요.', 'error');
+      hideFormError();
+      const required = [
+        ['#title', '도서명'], ['#author', '저자'], ['#publisher', '출판사'],
+        ['#level', '수준별'], ['#content', '내용별']
+      ];
+      const missing = required.filter(([sel]) => !$(sel).value.trim());
+      required.forEach(([sel]) => $(sel).removeAttribute('aria-invalid'));
+      if (missing.length) {
+        missing.forEach(([sel]) => $(sel).setAttribute('aria-invalid', 'true'));
+        $(missing[0][0]).focus();
+        showFormError(missing.map(([, name]) => name).join(', ') + ' 칸을 채워 주세요.');
         return;
       }
 
       if (isbn && !/^\d{13}$/.test(isbn)) {
         $('#isbnError').classList.add('show');
+        $('#isbn').setAttribute('aria-invalid', 'true');
         $('#isbn').focus();
-        showToast('ISBN은 13자리 숫자여야 합니다.', 'error');
         return;
       }
 
@@ -54,14 +70,14 @@
       };
 
       submitBtn.disabled = true;
-      submitBtn.textContent = '등록 중...';
+      submitBtn.textContent = '보내는 중';
 
       if (CONFIG.DEMO_MODE) {
         await new Promise((r) => setTimeout(r, 800));
-        showToast('(데모) 도서가 등록 요청되었습니다. 관리자 승인 후 게시됩니다.', 'success');
+        showToast('(데모) 등록 요청을 보냈어요. 관리자가 확인하면 목록에 올라가요.', 'success');
         form.reset();
         submitBtn.disabled = false;
-        submitBtn.textContent = '도서 등록 요청';
+        submitBtn.textContent = '등록 요청 보내기';
         return;
       }
 
@@ -74,18 +90,18 @@
         const data = await res.json();
 
         if (data.success) {
-          showToast(data.message || '도서가 등록 요청되었습니다.', 'success');
+          showToast('등록 요청을 보냈어요. 관리자가 확인하면 목록에 올라가요.', 'success');
           form.reset();
         } else {
-          showToast(data.error || '등록에 실패했습니다.', 'error');
+          showFormError('등록 요청을 보내지 못했어요. 잠시 뒤 다시 보내 주세요.');
         }
       } catch (err) {
         console.error('Register failed:', err);
-        showToast('서버 오류가 발생했습니다.', 'error');
+        showFormError('등록 요청을 보내지 못했어요. 인터넷 연결을 확인하고 다시 보내 주세요.');
       }
 
       submitBtn.disabled = false;
-      submitBtn.textContent = '도서 등록 요청';
+      submitBtn.textContent = '등록 요청 보내기';
     });
   }
 
@@ -96,6 +112,9 @@
     const closeBtn = $('#isbnDialogClose');
 
     btn.addEventListener('click', () => dialog.classList.add('open'));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') dialog.classList.remove('open');
+    });
     closeBtn.addEventListener('click', () => dialog.classList.remove('open'));
     dialog.addEventListener('click', (e) => {
       if (e.target === dialog) dialog.classList.remove('open');
@@ -111,16 +130,30 @@
       input.value = input.value.replace(/[^0-9]/g, '');
       if (input.value.length === 13 || input.value.length === 0) {
         error.classList.remove('show');
+        input.removeAttribute('aria-invalid');
       }
     });
 
     input.addEventListener('blur', () => {
       if (input.value.length > 0 && input.value.length !== 13) {
         error.classList.add('show');
+        input.setAttribute('aria-invalid', 'true');
       } else {
         error.classList.remove('show');
+        input.removeAttribute('aria-invalid');
       }
     });
+  }
+
+  // ---- 양식 오류 (버튼 바로 아래) ----
+  function showFormError(msg) {
+    const el = $('#formError');
+    el.textContent = msg;
+    el.style.display = '';
+  }
+
+  function hideFormError() {
+    $('#formError').style.display = 'none';
   }
 
   // ---- Toast ----

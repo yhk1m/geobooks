@@ -12,6 +12,7 @@
   let currentProject = 'all';
   let currentPage = 1;
   let pageSize = 20;
+  let loadFailed = false;
 
   // 내용별 위계 구조
   const CONTENT_HIERARCHY = {
@@ -24,7 +25,7 @@
 
   // ---- Init ----
   document.addEventListener('DOMContentLoaded', () => {
-    initMobileMenu();
+    initStates();
     initFilters();
     initSearch();
     initPageSize();
@@ -33,13 +34,38 @@
     trackView();
   });
 
-  // ---- Mobile Menu ----
-  function initMobileMenu() {
-    const btn = $('#mobileMenuBtn');
-    const nav = $('#mobileNav');
-    if (btn && nav) {
-      btn.addEventListener('click', () => nav.classList.toggle('open'));
-    }
+  // ---- 빈 화면, 오류 화면의 버튼 ----
+  function initStates() {
+    $('#resetFilters').addEventListener('click', resetFilters);
+    $('#retryLoad').addEventListener('click', () => {
+      $('#errorState').style.display = 'none';
+      loadBooks();
+    });
+  }
+
+  function resetFilters() {
+    currentLevel = 'all';
+    currentContent = 'all';
+    currentProject = 'all';
+    searchQuery = '';
+    showNewOnly = false;
+    currentPage = 1;
+    $('#searchInput').value = '';
+    $$('#levelFilters .chip, #contentFilters .chip').forEach((c) => {
+      c.classList.toggle('active', c.dataset.value === 'all');
+    });
+    $('#newBookFilter').setAttribute('aria-pressed', 'false');
+    const sub = $('#contentSubFilters');
+    sub.style.display = 'none';
+    sub.innerHTML = '';
+    const project = $('#projectFilter');
+    if (project) project.value = 'all';
+    renderBooks();
+  }
+
+  // 화면에 보이는 분류 이름 (가운데 점 대신 빗금)
+  function label(value) {
+    return String(value || '').replace(/·/g, '/');
   }
 
   // ---- 신간 판별 (출판일 기준 60일 이내 또는 미래 출간) ----
@@ -63,6 +89,7 @@
         // 신간 토글 해제
         showNewOnly = false;
         $('#newBookFilter').classList.remove('active');
+        $('#newBookFilter').setAttribute('aria-pressed', 'false');
         currentPage = 1;
         renderBooks();
       });
@@ -74,6 +101,7 @@
       newBtn.addEventListener('click', () => {
         showNewOnly = !showNewOnly;
         newBtn.classList.toggle('active', showNewOnly);
+        newBtn.setAttribute('aria-pressed', String(showNewOnly));
         currentPage = 1;
         renderBooks();
       });
@@ -93,8 +121,8 @@
           // Show sub-chips for parent category
           const children = CONTENT_HIERARCHY[value];
           subPanel.innerHTML =
-            `<button class="chip active" data-value="${value}">전체</button>` +
-            children.map((c) => `<button class="chip" data-value="${c}">${c}</button>`).join('');
+            `<button type="button" class="chip active" data-value="${value}">${value} 전체</button>` +
+            children.map((c) => `<button type="button" class="chip" data-value="${c}">${c}</button>`).join('');
           subPanel.style.display = '';
 
           // Set filter to parent (includes all children)
@@ -141,6 +169,7 @@
   async function loadBooks() {
     const loading = $('#loading');
     loading.style.display = '';
+    loadFailed = false;
 
     if (CONFIG.DEMO_MODE) {
       await delay(400);
@@ -151,10 +180,13 @@
         const data = await res.json();
         if (data.success) {
           allBooks = data.books;
+        } else {
+          loadFailed = true;
         }
       } catch (err) {
         console.error('Failed to load books:', err);
         allBooks = [];
+        loadFailed = true;
       }
     }
 
@@ -256,9 +288,10 @@
     count.textContent = filtered.length;
     const paginationEl = $('#pagination');
 
+    $('#errorState').style.display = loadFailed ? '' : 'none';
     if (filtered.length === 0) {
       grid.innerHTML = '';
-      empty.style.display = '';
+      empty.style.display = loadFailed ? 'none' : '';
       paginationEl.innerHTML = '';
       return;
     }
@@ -272,10 +305,14 @@
     grid.innerHTML = paged.map((book) => cardHTML(book)).join('');
 
     grid.querySelectorAll('.book-card').forEach((card) => {
-      card.addEventListener('click', () => {
+      const open = () => {
         const id = card.dataset.id;
         const book = allBooks.find((b) => b.ID === id);
         if (book) openModal(book);
+      };
+      card.addEventListener('click', open);
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
       });
     });
 
@@ -295,15 +332,16 @@
     }
 
     let html = '';
-    html += `<button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} data-page="1">&laquo;</button>`;
-    html += `<button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} data-page="${currentPage - 1}">&lsaquo;</button>`;
+    const chev = (d) => `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="${d}"/></svg>`;
+    html += `<button type="button" class="page-btn" aria-label="첫 쪽" ${currentPage === 1 ? 'disabled' : ''} data-page="1">${chev('m11 17-5-5 5-5M18 17l-5-5 5-5')}</button>`;
+    html += `<button type="button" class="page-btn" aria-label="앞 쪽" ${currentPage === 1 ? 'disabled' : ''} data-page="${currentPage - 1}">${chev('m15 18-6-6 6-6')}</button>`;
 
     for (let i = startPage; i <= endPage; i++) {
-      html += `<button class="page-btn${i === currentPage ? ' active' : ''}" data-page="${i}">${i}</button>`;
+      html += `<button type="button" class="page-btn${i === currentPage ? ' active' : ''}" ${i === currentPage ? 'aria-current="page"' : ''} data-page="${i}">${i}</button>`;
     }
 
-    html += `<button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} data-page="${currentPage + 1}">&rsaquo;</button>`;
-    html += `<button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} data-page="${totalPages}">&raquo;</button>`;
+    html += `<button type="button" class="page-btn" aria-label="다음 쪽" ${currentPage === totalPages ? 'disabled' : ''} data-page="${currentPage + 1}">${chev('m9 18 6-6-6-6')}</button>`;
+    html += `<button type="button" class="page-btn" aria-label="마지막 쪽" ${currentPage === totalPages ? 'disabled' : ''} data-page="${totalPages}">${chev('m13 17 5-5-5-5M6 17l5-5-5-5')}</button>`;
 
     el.innerHTML = html;
     el.querySelectorAll('.page-btn:not([disabled])').forEach((btn) => {
@@ -319,17 +357,17 @@
     const coverContent = book['표지URL']
       ? `<img src="${escapeHtml(book['표지URL'])}" alt="${escapeHtml(book['도서명'])}" loading="lazy">`
       : `<div class="cover-placeholder">
-           <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="#ccc" stroke-width="1.5">
+           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
            </svg>
-           <span>${escapeHtml(book['내용별'])}</span>
+           <span>${escapeHtml(label(book['내용별']))}</span>
          </div>`;
 
-    const newBadge = isNewBook(book) ? '<span class="new-badge">N</span>' : '';
+    const newBadge = isNewBook(book) ? '<span class="new-badge">신간</span>' : '';
 
     return `
-      <div class="book-card" data-id="${book.ID}">
+      <div class="book-card" role="button" tabindex="0" data-id="${book.ID}">
         ${newBadge}
         <div class="cover-wrap">${coverContent}</div>
         <div class="info">
@@ -338,8 +376,8 @@
           <div class="book-author">${escapeHtml(book['저자'])}</div>
           <div class="book-publisher">${escapeHtml(book['출판사'])}</div>
           <div class="badges">
-            <span class="badge badge--level">${escapeHtml(book['수준별'])}</span>
-            <span class="badge badge--content">${escapeHtml(book['내용별'])}</span>
+            <span class="badge badge--level">${escapeHtml(label(book['수준별']))}</span>
+            <span class="badge badge--content">${escapeHtml(label(book['내용별']))}</span>
           </div>
         </div>
       </div>`;
@@ -370,11 +408,11 @@
     const buttons = stores
       .filter((s) => book[s.key])
       .map((s) =>
-        `<a href="${escapeHtml(book[s.key])}" target="_blank" rel="noopener" class="buy-btn buy-btn--${s.cls}">${s.name}</a>`
+        `<a href="${escapeHtml(book[s.key])}" target="_blank" rel="noopener" class="buy-btn">${s.name}<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>`
       );
 
     if (buttons.length === 0) return '';
-    return `<div class="buy-links">${buttons.join('')}</div>`;
+    return `<p class="buy-title">서점에서 보기</p><div class="buy-links">${buttons.join('')}</div>`;
   }
 
   function openModal(book) {
@@ -384,7 +422,7 @@
     const coverContent = book['표지URL']
       ? `<img src="${escapeHtml(book['표지URL'])}" alt="">`
       : `<div class="cover-placeholder">
-           <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#ccc" stroke-width="1.5">
+           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
            </svg>
@@ -396,13 +434,15 @@
         <div class="modal-info">
           <h2>${escapeHtml(book['도서명'])}</h2>
           ${book['부제'] ? `<p class="modal-subtitle">${escapeHtml(book['부제'])}</p>` : ''}
+          <div class="detail-list">
           <div class="detail-row"><span class="detail-label">저자</span><span class="detail-value">${escapeHtml(book['저자'])}</span></div>
           <div class="detail-row"><span class="detail-label">출판사</span><span class="detail-value">${escapeHtml(book['출판사'])}</span></div>
-          <div class="detail-row"><span class="detail-label">출판일</span><span class="detail-value">${escapeHtml(formatDate(book['출판일']))}</span></div>
-          <div class="detail-row"><span class="detail-label">ISBN</span><span class="detail-value">${escapeHtml(book['ISBN'] || '-')}</span></div>
+          <div class="detail-row"><span class="detail-label">출판일</span><span class="detail-value num">${escapeHtml(formatDate(book['출판일']))}</span></div>
+          <div class="detail-row"><span class="detail-label">ISBN</span><span class="detail-value num">${escapeHtml(book['ISBN'] || '-')}</span></div>
+          </div>
           <div class="modal-badges">
-            <span class="badge badge--level">${escapeHtml(book['수준별'])}</span>
-            <span class="badge badge--content">${escapeHtml(book['내용별'])}</span>
+            <span class="badge badge--level">${escapeHtml(label(book['수준별']))}</span>
+            <span class="badge badge--content">${escapeHtml(label(book['내용별']))}</span>
           </div>
           ${buildBuyLinks(book)}
         </div>
@@ -414,6 +454,8 @@
   // ---- Viewership ----
   async function trackView() {
     if (CONFIG.DEMO_MODE) return;
+    // 화면 확인용으로 열 때는 조회수를 세지 않는다 (?noview=1)
+    if (new URLSearchParams(location.search).has('noview')) return;
     try {
       await fetch(CONFIG.API_URL, {
         method: 'POST',
@@ -448,9 +490,18 @@
   }
 
   // ---- Utilities ----
+  // 시트 날짜는 UTC 시각(예: 2026-11-14T15:00:00.000Z)으로 오므로 이 기기 시간대로 바꿔 읽는다
   function formatDate(val) {
     if (!val) return '-';
-    return String(val).slice(0, 10);
+    const s = String(val);
+    if (s.includes('T')) {
+      const d = new Date(s);
+      if (!isNaN(d)) {
+        const p = (n) => String(n).padStart(2, '0');
+        return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+      }
+    }
+    return s.slice(0, 10);
   }
 
   function escapeHtml(str) {
