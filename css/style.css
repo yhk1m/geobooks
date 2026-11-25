@@ -606,7 +606,7 @@ p { margin: 0; }
 
 /* 서점 버튼은 각 회사 CI 색. 흰 글자 대비가 3.8~4이라 큰 글자(19px 굵게, 기준 3:1)로 */
 .buy-btn--kyobo, .buy-btn--yes24, .buy-btn--aladin { font-size: 1.1875rem; font-weight: var(--fw-bold); }
-.buy-btn--kyobo  { background: #45b035; color: #081d58; } /* 교보 초록 + 교보 남색 */
+.buy-btn--kyobo  { background: #3d9f2f; color: #ffffff; } /* 교보 초록을 조금 진하게: 흰 글자 대비 3.39 (19px 굵게는 3:1 기준) */
 .buy-btn--yes24  { background: #0080ff; color: #ffffff; }
 .buy-btn--aladin { background: #f21c8c; color: #ffffff; }
 .buy-btn--kyobo .icon, .buy-btn--yes24 .icon, .buy-btn--aladin .icon { color: currentColor; }
