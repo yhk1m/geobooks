@@ -183,32 +183,40 @@ p { margin: 0; }
 .filter-chips { display: flex; flex-wrap: wrap; gap: var(--sp-2); min-width: 0; }
 .filter-chips-wrap { display: flex; flex-direction: column; gap: var(--sp-2); flex: 1; min-width: 0; }
 
+/* 칩: 당토 공통 부품(controls.css .dt-chip)과 같은 모양. 높이 36, 반투명 회색, 고른 칩은 진한 회색 채움 */
 .chip {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex: none;
   min-height: 2.25rem;
-  padding: 0 var(--sp-4);
+  padding: 0 0.75rem;
   border: 0;
   border-radius: var(--r-full);
-  background: var(--fill-subtle);
-  color: var(--text);
+  background: var(--ctl-weak);
+  color: var(--text-strong);
   font-size: var(--fs-small);
   font-weight: var(--fw-medium);
+  line-height: 1.35;
   white-space: nowrap;
   cursor: pointer;
-  transition: background-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+  user-select: none;
+  transition: background-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), scale var(--dur-fast) var(--ease);
 }
 
 .chip.active {
-  background: var(--accent);
-  color: var(--on-accent);
-  font-weight: var(--fw-semibold);
+  background: var(--text-strong);
+  color: var(--bg);
+  font-weight: var(--fw-bold);
 }
+
+.chip:active { scale: 0.96; }
 
 .chip-new .chip-dot {
   width: 6px; height: 6px; border-radius: 50%;
   background: var(--third);
-  margin-right: var(--sp-2);
+  margin-right: 2px;
 }
 
 /* 자연지리, 인문지리의 하위 분류 */
@@ -218,23 +226,14 @@ p { margin: 0; }
   gap: var(--sp-2);
 }
 
+/* 하위 분류는 작은 칩(.dt-chip--s, 높이 32) */
 .filter-sub-chips .chip {
   min-height: 2rem;
-  padding: 0 var(--sp-3);
-  background: transparent;
-  box-shadow: inset 0 0 0 1px var(--line-strong);
-  font-size: var(--fs-caption);
+  padding: 0 0.625rem;
 }
 
-.filter-sub-chips .chip.active {
-  background: var(--accent-weak);
-  box-shadow: inset 0 0 0 1.5px var(--accent);
-  color: var(--accent-text);
-}
-
-@media (hover: hover) {
-  .chip:not(.active):hover { background: var(--line-strong); color: var(--text-strong); }
-  .filter-sub-chips .chip:not(.active):hover { background: var(--fill-subtle); }
+@media (hover: hover) and (pointer: fine) {
+  .chip:not(.active):hover { background: var(--ctl-weak-press); }
 }
 
 /* ---- 결과 ---- */
@@ -706,32 +705,37 @@ p { margin: 0; }
   border: 0;
   border-radius: var(--r-control);
   font-size: var(--fs-small);
-  font-weight: var(--fw-semibold);
+  font-weight: var(--fw-bold);
+  line-height: 1.35;
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
   transition: background-color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
 }
 
+/* 버튼: 당토 공통 부품(controls.css .dt-btn)과 같은 모양. 기본 40, 크게 52, 작게 32(알약) */
 .btn:active:not(:disabled) { transform: scale(0.97); }
 
-.btn-primary { background: var(--accent); color: var(--on-accent); }
-.btn-primary:disabled { background: var(--fill-subtle); color: var(--text-disabled); cursor: not-allowed; }
-.btn-tonal { background: var(--accent-weak); color: var(--accent-text); }
-.btn-outline { background: var(--fill-subtle); color: var(--text-strong); }
-.btn-ghost { background: transparent; color: var(--text); }
-.btn-danger { background: transparent; color: var(--critical); }
-.btn-danger-fill { background: var(--critical); color: #fff; }
+.btn-primary { background: var(--accent); color: var(--on-accent); }              /* dt-btn--primary */
+.btn-tonal { background: var(--accent-weak); color: var(--accent-text); }         /* dt-btn--brand-weak */
+.btn-outline { background: var(--ctl-weak); color: var(--text-strong); }          /* dt-btn--weak */
+.btn-ghost { background: transparent; color: var(--text); }                       /* dt-btn--ghost */
+.btn-danger { background: transparent; color: var(--critical); }                  /* 글자만 빨강(ghost) */
+.btn-danger-fill { background: var(--critical); color: var(--ctl-on-critical); }  /* dt-btn--critical */
+.btn:disabled { background: var(--ctl-weak); color: var(--text-disabled); cursor: not-allowed; }
+.btn-ghost:disabled, .btn-danger:disabled { background: transparent; }
 
-.btn-block { width: 100%; min-height: var(--btn-h); font-size: var(--fs-body); }
-.btn-sm { min-height: 2rem; padding: 0 var(--sp-3); font-size: var(--fs-caption); }
+.btn-block { width: 100%; min-height: var(--btn-h); font-size: 1.125rem; }
+.btn-sm { min-height: 2rem; padding: 0 0.875rem; font-size: var(--fs-caption); border-radius: var(--r-full); }
 
-@media (hover: hover) {
+@media (hover: hover) and (pointer: fine) {
   .btn-primary:hover:not(:disabled) { background: var(--accent-press); }
-  .btn-tonal:hover { background: var(--accent-weak-press); }
-  .btn-outline:hover, .btn-ghost:hover { background: var(--line-strong); }
-  .btn-danger:hover { background: var(--critical-weak); }
+  .btn-tonal:hover:not(:disabled), .btn-outline:hover:not(:disabled) { filter: brightness(0.96); }
+  .btn-ghost:hover:not(:disabled) { background: var(--ctl-weak); }
+  .btn-danger:hover:not(:disabled) { background: var(--critical-weak); }
 }
+.btn-tonal:active:not(:disabled) { background: var(--accent-weak-press); }
+.btn-primary:active:not(:disabled) { background: var(--accent-press); }
 
 /* ---- ISBN 도움말 ---- */
 .isbn-info-btn {
@@ -958,7 +962,9 @@ p { margin: 0; }
   margin-top: var(--sp-6);
 }
 
-.confirm-actions .btn { min-height: var(--btn-h); font-size: var(--fs-body); }
+.confirm-actions .btn { min-height: var(--btn-h); font-size: 1.125rem; }
+/* 촘촘한 관리 화면에서는 큰 버튼 높이가 줄어드니 글자도 16으로 */
+[data-density="compact"] .btn-block, [data-density="compact"] .confirm-actions .btn { font-size: var(--fs-body); }
 
 /* ---- 토스트 ---- */
 .toast {
