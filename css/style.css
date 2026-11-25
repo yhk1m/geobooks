@@ -633,9 +633,6 @@ p { margin: 0; }
 
 .copyright {
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   font-size: var(--fs-caption);
   color: var(--text-muted);
 }
